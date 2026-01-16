@@ -31,6 +31,14 @@ export class Action {
         page: page++
       })
       for (const pr of response.data) {
+        console.log(`Found PR #${pr.number}: ${pr.title}`)
+        console.log(` - Labels: ${pr.labels.map((l) => l.name).join(', ')}`)
+        console.log(
+          ` - Auto-merge: ${pr.auto_merge ? 'enabled' : 'not enabled'}`
+        )
+        console.log(` - Draft: ${pr.draft ? 'yes' : 'no'}`)
+        console.log(` - Base branch: ${pr.base.ref}`)
+
         yield pr
       }
     } while (response.headers.link?.includes('rel="next"'))
@@ -60,19 +68,19 @@ export class Action {
           .map((l) => l.name)
           .some((name) => this.config.avoidedLabels.includes(name))
         if (hasAvoidedLabel) {
-          prsResult.skipped.push(pr.id)
+          prsResult.skipped.push(pr.number)
           continue
         }
       }
       if (this.config.requiredAutomerge && pr.auto_merge == null) {
-        prsResult.skipped.push(pr.id)
+        prsResult.skipped.push(pr.number)
         continue
       }
       try {
         await this.updatePullRequestBranch(pr.number)
-        prsResult.updated.push(pr.id)
+        prsResult.updated.push(pr.number)
       } catch {
-        prsResult.failed.push(pr.id)
+        prsResult.failed.push(pr.number)
       }
     }
 
