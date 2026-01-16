@@ -22,6 +22,9 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
 jobs:
   make-release:
     name: Make release
@@ -30,11 +33,11 @@ jobs:
     steps:
       - name: Checkout
         id: checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
         id: setup-node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
           cache: npm
@@ -46,7 +49,7 @@ jobs:
 
       - name: Calculate next version
         id: next-version
-        uses: ./
+        uses: alfred82santa/action-next-version@v1
         with:
           version: ${{ steps.current-version.outputs.version }}
           level: ${{ inputs.prereleaseLevel }}

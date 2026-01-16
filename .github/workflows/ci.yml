@@ -11,6 +11,12 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group:
+    ${{ github.workflow }}-${{ github.base_ref }}-${{ github.ref }}-${{
+    github.event_name}}
+  cancel-in-progress: true
+
 jobs:
   test-typescript:
     name: TypeScript Tests
@@ -23,7 +29,7 @@ jobs:
 
       - name: Setup Node.js
         id: setup-node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version-file: .node-version
           cache: npm
