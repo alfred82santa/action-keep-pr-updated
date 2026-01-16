@@ -1,188 +1,199 @@
-# Create a GitHub Action Using TypeScript
+# Keep PR Updated
 
-[![GitHub Super-Linter](https://github.com/actions/typescript-action/actions/workflows/linter.yml/badge.svg)](https://github.com/super-linter/super-linter)
-![CI](https://github.com/actions/typescript-action/actions/workflows/ci.yml/badge.svg)
-[![Check dist/](https://github.com/actions/typescript-action/actions/workflows/check-dist.yml/badge.svg)](https://github.com/actions/typescript-action/actions/workflows/check-dist.yml)
-[![CodeQL](https://github.com/actions/typescript-action/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/actions/typescript-action/actions/workflows/codeql-analysis.yml)
+[![GitHub Super-Linter](https://github.com/alfred82santa/action-keep-pr-updated/actions/workflows/linter.yml/badge.svg)](https://github.com/super-linter/super-linter)
+![CI](https://github.com/alfred82santa/action-keep-pr-updated/actions/workflows/ci.yml/badge.svg)
+[![Check dist/](https://github.com/alfred82santa/action-keep-pr-updated/actions/workflows/check-dist.yml/badge.svg)](https://github.com/alfred82santa/action-keep-pr-updated/actions/workflows/check-dist.yml)
+[![CodeQL](https://github.com/alfred82santa/action-keep-pr-updated/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/alfred82santa/action-keep-pr-updated/actions/workflows/codeql-analysis.yml)
 [![Coverage](./badges/coverage.svg)](./badges/coverage.svg)
 
-Use this template to bootstrap the creation of a TypeScript action. :rocket:
+A GitHub Action that automatically keeps your pull requests up to date with the
+base branch. This action helps maintain clean and conflict-free pull requests by
+automatically updating them when the base branch changes.
 
-This template includes compilation support, tests, a validation workflow,
-publishing, and versioning guidance.
+## Features
 
-If you are new, there's also a simpler introduction in the
-[Hello world JavaScript action repository](https://github.com/actions/hello-world-javascript-action).
+- 🔄 Automatically updates open pull requests with the latest changes from the
+  base branch
+- 🏷️ Filter pull requests by required labels
+- 🚫 Skip pull requests with specific labels
+- ⚡ Optional filtering for PRs with auto-merge enabled
+- 📊 Detailed summary reports and outputs for workflow integration
 
-## Create Your Own Action
+## Quick Start
 
-To create your own action, you can use this repository as a template! Just
-follow the below instructions:
+Add this action to your workflow to automatically keep all open pull requests
+updated:
 
-1. Click the **Use this template** button at the top of the repository
-1. Select **Create a new repository**
-1. Select an owner and name for your new repository
-1. Click **Create repository**
-1. Clone your new repository
+```yaml
+name: Keep PRs Updated
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Keep PRs updated
+        uses: alfred82santa/action-keep-pr-updated@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+```
 
 > [!IMPORTANT]
 >
-> Make sure to remove or update the [`CODEOWNERS`](./CODEOWNERS) file! For
-> details on how to use this file, see
-> [About code owners](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners).
-
-## Initial Setup
-
-After you've cloned the repository to your local machine or codespace, you'll
-need to perform some initial setup steps before you can develop your action.
-
-> [!NOTE]
+> **Using a Personal Access Token (PAT)**
 >
-> You'll need to have a reasonably modern version of
-> [Node.js](https://nodejs.org) handy (20.x or later should work!). If you are
-> using a version manager like [`nodenv`](https://github.com/nodenv/nodenv) or
-> [`fnm`](https://github.com/Schniz/fnm), this template has a `.node-version`
-> file at the root of the repository that can be used to automatically switch to
-> the correct version when you `cd` into the repository. Additionally, this
-> `.node-version` file is used by GitHub Actions in any `actions/setup-node`
-> actions.
+> To trigger PR checks after updating branches, you must use a
+> [Personal Access Token (PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
+> instead of the default `GITHUB_TOKEN`. This is because
+> [events triggered by the default `GITHUB_TOKEN` do not create a new workflow runs](https://docs.github.com/en/actions/concepts/security/github_token#when-github_token-triggers-workflow-runs).
+>
+> To use a PAT with this action:
+>
+> 1. [Create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
+>    with appropriate permissions
+> 2. Add it as a repository secret
+> 3. Use it in the action:
+>
+>    ```yaml
+>    - name: Keep PRs updated
+>      uses: alfred82santa/action-keep-pr-updated@v1
+>      with:
+>        github-token: ${{ secrets.PAT }}
+>    ```
 
-1. :hammer_and_wrench: Install the dependencies
+## Inputs
 
-   ```bash
-   npm install
-   ```
+| Input | Description | Required | Default |
 
-1. :building_construction: Package the TypeScript for distribution
+| -------------------- |
+-------------------------------------------------------------- | -------- |
+------------------------- | | `github-token` | GitHub token to use for
+authentication | Yes | `${{ github.token }}` | | `base-branch` | The base branch
+to keep the pull requests updated with | Yes | Current branch or PR base | |
+`required-labels` | Comma-separated list of labels required to trigger the
+update | No | `''` | | `required-automerge` | If true, only update PRs with
+auto-merge enabled | No | `false` | | `avoided-labels` | Comma-separated list of
+labels that prevent updates if present | No | `''` |
 
-   ```bash
-   npm run bundle
-   ```
+## Outputs
 
-1. :white_check_mark: Run the tests
+| Output                  | Description                                    |
+| ----------------------- | ---------------------------------------------- |
+| `pull-requests-updated` | Array of PR IDs that were successfully updated |
+| `pull-requests-skipped` | Array of PR IDs that were skipped              |
+| `pull-requests-failed`  | Array of PR IDs that failed to update          |
 
-   ```bash
-   $ npm test
+## Usage Examples
 
-   PASS  ./index.test.js
-     ✓ throws invalid number (3ms)
-     ✓ wait 500 ms (504ms)
-     ✓ test runs (95ms)
+### Basic Usage
 
-   ...
-   ```
+Update all open pull requests targeting the main branch:
 
-## Update the Action Metadata
+```yaml
+- name: Keep PRs updated
+  uses: alfred82santa/action-keep-pr-updated@v1
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+```
 
-The [`action.yml`](action.yml) file defines metadata about your action, such as
-input(s) and output(s). For details about this file, see
-[Metadata syntax for GitHub Actions](https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions).
+### Only Update PRs with Specific Labels
 
-When you copy this repository, update `action.yml` with the name, description,
-inputs, and outputs for your action.
+Update only pull requests that have the "keep-updated" label:
 
-## Update the Action Code
+```yaml
+- name: Keep PRs updated
+  uses: alfred82santa/action-keep-pr-updated@v1
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    base-branch: main
+    required-labels: 'keep-updated'
+```
 
-The [`src/`](./src/) directory is the heart of your action! This contains the
-source code that will be run when your action is invoked. You can replace the
-contents of this directory with your own code.
+### Skip PRs with Certain Labels
 
-There are a few things to keep in mind when writing your action code:
+Update all PRs except those labeled with "do-not-update" or "wip":
 
-- Most GitHub Actions toolkit and CI/CD operations are processed asynchronously.
-  In `main.ts`, you will see that the action is run in an `async` function.
+```yaml
+- name: Keep PRs updated
+  uses: alfred82santa/action-keep-pr-updated@v1
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    base-branch: main
+    avoided-labels: 'do-not-update,wip'
+```
 
-  ```javascript
-  import * as core from '@actions/core'
-  //...
+### Only Update PRs with Auto-Merge Enabled
 
-  async function run() {
-    try {
-      //...
-    } catch (error) {
-      core.setFailed(error.message)
-    }
-  }
-  ```
+Update only pull requests that have auto-merge enabled:
 
-  For more information about the GitHub Actions toolkit, see the
-  [documentation](https://github.com/actions/toolkit/blob/main/README.md).
+```yaml
+- name: Keep PRs updated
+  uses: alfred82santa/action-keep-pr-updated@v1
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    base-branch: main
+    required-automerge: 'true'
+```
 
-So, what are you waiting for? Go ahead and start customizing your action!
+### Using Outputs
 
-1. Create a new branch
+Access the results of the action to perform additional workflow steps:
 
-   ```bash
-   git checkout -b releases/v1
-   ```
+```yaml
+- name: Keep PRs updated
+  id: update-prs
+  uses: alfred82santa/action-keep-pr-updated@v1
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    base-branch: main
 
-1. Replace the contents of `src/` with your action code
-1. Add tests to `__tests__/` for your source code
-1. Format, test, and build the action
+- name: Report results
+  run: |
+    echo "Updated PRs: ${{ steps.update-prs.outputs.pull-requests-updated }}"
+    echo "Skipped PRs: ${{ steps.update-prs.outputs.pull-requests-skipped }}"
+    echo "Failed PRs: ${{ steps.update-prs.outputs.pull-requests-failed }}"
+```
 
-   ```bash
-   npm run all
-   ```
+## How It Works
 
-   > This step is important! It will run [`rollup`](https://rollupjs.org/) to
-   > build the final JavaScript action code with all dependencies included. If
-   > you do not run this step, your action will not work correctly when it is
-   > used in a workflow.
+1. The action fetches all open pull requests targeting the specified base branch
+2. For each PR, it checks:
+   - If `required-labels` is set, the PR must have at least one of those labels
+   - If `avoided-labels` is set, the PR must not have any of those labels
+   - If `required-automerge` is true, the PR must have auto-merge enabled
+3. For qualifying PRs, it attempts to update the branch with the latest changes
+   from the base branch
+4. Results are reported in the workflow summary and available as outputs
 
-1. (Optional) Test your action locally
+## Scheduled Updates
 
-   The [`@github/local-action`](https://github.com/github/local-action) utility
-   can be used to test your action locally. It is a simple command-line tool
-   that "stubs" (or simulates) the GitHub Actions Toolkit. This way, you can run
-   your TypeScript action locally without having to commit and push your changes
-   to a repository.
+To keep your PRs automatically updated, consider running this action on a
+schedule:
 
-   The `local-action` utility can be run in the following ways:
-   - Visual Studio Code Debugger
+```yaml
+on:
+  schedule:
+    - cron: '0 0,6,12,18 * * *' # Every 6 hours
+  workflow_dispatch: # Allow manual triggering
+```
 
-     Make sure to review and, if needed, update
-     [`.vscode/launch.json`](./.vscode/launch.json)
+## Permissions
 
-   - Terminal/Command Prompt
+This action requires the following permissions:
 
-     ```bash
-     # npx @github/local action <action-yaml-path> <entrypoint> <dotenv-file>
-     npx @github/local-action . src/main.ts .env
-     ```
+```yaml
+permissions:
+  contents: read
+  pull-requests: write
+```
 
-   You can provide a `.env` file to the `local-action` CLI to set environment
-   variables used by the GitHub Actions Toolkit. For example, setting inputs and
-   event payload data used by your action. For more information, see the example
-   file, [`.env.example`](./.env.example), and the
-   [GitHub Actions Documentation](https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables).
+## Development
 
-1. Commit your changes
-
-   ```bash
-   git add .
-   git commit -m "My first action is ready!"
-   ```
-
-1. Push them to your repository
-
-   ```bash
-   git push -u origin releases/v1
-   ```
-
-1. Create a pull request and get feedback on your action
-1. Merge the pull request into the `main` branch
-
-Your action is now published! :rocket:
-
-For information about versioning your action, see
-[Versioning](https://github.com/actions/toolkit/blob/main/docs/action-versioning.md)
-in the GitHub Actions toolkit.
-
-## Validate the Action
-
-You can now validate the action by referencing it in a workflow file. For
-example, [`ci.yml`](./.github/workflows/ci.yml) demonstrates how to reference an
-action in the same repository.
+For information on contributing to this action, see the development
+documentation below.
 
 ```yaml
 steps:
@@ -202,104 +213,94 @@ steps:
 ```
 
 For example workflow runs, check out the
-[Actions tab](https://github.com/actions/typescript-action/actions)! :rocket:
+[Actions tab](https://github.com/alfred82santa/action-keep-pr-updated/actions)!
 
-## Usage
+---
 
-After testing, you can create version tag(s) that developers can use to
-reference different stable versions of your action. For more information, see
+## Development and Contributing
+
+### Initial Setup
+
+> [!NOTE]
+>
+> You'll need to have a reasonably modern version of
+> [Node.js](https://nodejs.org) handy (20.x or later should work!). If you are
+> using a version manager like [`nodenv`](https://github.com/nodenv/nodenv) or
+> [`fnm`](https://github.com/Schniz/fnm), this repository has a `.node-version`
+> file at the root that can be used to automatically switch to the correct
+> version when you `cd` into the repository.
+
+1. Install the dependencies
+
+   ```bash
+   npm install
+   ```
+
+1. Package the TypeScript for distribution
+
+   ```bash
+   npm run bundle
+   ```
+
+1. Run the tests
+
+   ```bash
+   npm test
+   ```
+
+### Testing Locally
+
+The [`@github/local-action`](https://github.com/github/local-action) utility can
+be used to test the action locally without having to commit and push changes.
+
+Run it using:
+
+- Visual Studio Code Debugger (see
+  [`.vscode/launch.json`](./.vscode/launch.json))
+
+- Terminal/Command Prompt
+
+  ```bash
+  npx @github/local-action . src/main.ts .env
+  ```
+
+You can provide a `.env` file to set environment variables and inputs. See
+[`.env.example`](./.env.example) for an example configuration.
+
+### Making Changes
+
+1. Make your changes to the TypeScript source files in [`src/`](./src/)
+1. Add or update tests in [`__tests__/`](./__tests__/)
+1. Run formatting, linting, tests, and bundling:
+
+   ```bash
+   npm run all
+   ```
+
+   > This step is important! It will run [`rollup`](https://rollupjs.org/) to
+   > build the final JavaScript action code with all dependencies included in
+   > the `dist/` directory.
+
+1. Commit your changes
+
+### Releasing
+
+This project uses semantic versioning. When releasing a new version:
+
+1. Update the version in `package.json`
+1. Create a new tag following the format `vX.X.X`
+1. Push the tag to trigger the release workflow
+1. Create a new GitHub release with the tag
+
+For more information, see
 [Versioning](https://github.com/actions/toolkit/blob/main/docs/action-versioning.md)
 in the GitHub Actions toolkit.
 
-To include the action in a workflow in another repository, you can use the
-`uses` syntax with the `@` symbol to reference a specific branch, tag, or commit
-hash.
+## License
 
-```yaml
-steps:
-  - name: Checkout
-    id: checkout
-    uses: actions/checkout@v4
+This project is licensed under the GNU Affero General Public License v3.0 - see
+the [LICENSE](LICENSE) file for details.
 
-  - name: Test Local Action
-    id: test-action
-    uses: actions/typescript-action@v1 # Commit with the `v1` tag
-    with:
-      milliseconds: 1000
+## Author
 
-  - name: Print Output
-    id: output
-    run: echo "${{ steps.test-action.outputs.time }}"
-```
-
-## Publishing a New Release
-
-This project includes a helper script, [`script/release`](./script/release)
-designed to streamline the process of tagging and pushing new releases for
-GitHub Actions.
-
-GitHub Actions allows users to select a specific version of the action to use,
-based on release tags. This script simplifies this process by performing the
-following steps:
-
-1. **Retrieving the latest release tag:** The script starts by fetching the most
-   recent SemVer release tag of the current branch, by looking at the local data
-   available in your repository.
-1. **Prompting for a new release tag:** The user is then prompted to enter a new
-   release tag. To assist with this, the script displays the tag retrieved in
-   the previous step, and validates the format of the inputted tag (vX.X.X). The
-   user is also reminded to update the version field in package.json.
-1. **Tagging the new release:** The script then tags a new release and syncs the
-   separate major tag (e.g. v1, v2) with the new release tag (e.g. v1.0.0,
-   v2.1.2). When the user is creating a new major release, the script
-   auto-detects this and creates a `releases/v#` branch for the previous major
-   version.
-1. **Pushing changes to remote:** Finally, the script pushes the necessary
-   commits, tags and branches to the remote repository. From here, you will need
-   to create a new release in GitHub so users can easily reference the new tags
-   in their workflows.
-
-## Dependency License Management
-
-This template includes a GitHub Actions workflow,
-[`licensed.yml`](./.github/workflows/licensed.yml), that uses
-[Licensed](https://github.com/licensee/licensed) to check for dependencies with
-missing or non-compliant licenses. This workflow is initially disabled. To
-enable the workflow, follow the below steps.
-
-1. Open [`licensed.yml`](./.github/workflows/licensed.yml)
-1. Uncomment the following lines:
-
-   ```yaml
-   # pull_request:
-   #   branches:
-   #     - main
-   # push:
-   #   branches:
-   #     - main
-   ```
-
-1. Save and commit the changes
-
-Once complete, this workflow will run any time a pull request is created or
-changes pushed directly to `main`. If the workflow detects any dependencies with
-missing or non-compliant licenses, it will fail the workflow and provide details
-on the issue(s) found.
-
-### Updating Licenses
-
-Whenever you install or update dependencies, you can use the Licensed CLI to
-update the licenses database. To install Licensed, see the project's
-[Readme](https://github.com/licensee/licensed?tab=readme-ov-file#installation).
-
-To update the cached licenses, run the following command:
-
-```bash
-licensed cache
-```
-
-To check the status of cached licenses, run the following command:
-
-```bash
-licensed status
-```
+Created by [alfred82santa](https://github.com/alfred82santa)
