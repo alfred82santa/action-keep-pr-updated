@@ -3,7 +3,7 @@ name: Common make release
 on:
   workflow_call:
     inputs:
-      prereleaseLevel:
+      preReleaseLevel:
         description: 'Prerelease level: rc, beta, alpha, dev'
         type: string
 
@@ -52,7 +52,7 @@ jobs:
         uses: alfred82santa/action-next-version@v1
         with:
           version: ${{ steps.current-version.outputs.version }}
-          level: ${{ inputs.prereleaseLevel }}
+          level: ${{ inputs.preReleaseLevel }}
           versionFormat: 'semver'
 
       - name: Release

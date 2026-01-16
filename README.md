@@ -54,8 +54,8 @@ jobs:
 >
 > 1. [Create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
 >    with appropriate permissions
-> 2. Add it as a repository secret
-> 3. Use it in the action:
+> 1. Add it as a repository secret
+> 1. Use it in the action:
 >
 >    ```yaml
 >    - name: Keep PRs updated
@@ -156,13 +156,13 @@ Access the results of the action to perform additional workflow steps:
 ## How It Works
 
 1. The action fetches all open pull requests targeting the specified base branch
-2. For each PR, it checks:
+1. For each PR, it checks:
    - If `required-labels` is set, the PR must have at least one of those labels
    - If `avoided-labels` is set, the PR must not have any of those labels
    - If `required-automerge` is true, the PR must have auto-merge enabled
-3. For qualifying PRs, it attempts to update the branch with the latest changes
+1. For qualifying PRs, it attempts to update the branch with the latest changes
    from the base branch
-4. Results are reported in the workflow summary and available as outputs
+1. Results are reported in the workflow summary and available as outputs
 
 ## Scheduled Updates
 
