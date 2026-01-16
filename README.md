@@ -66,17 +66,13 @@ jobs:
 
 ## Inputs
 
-| Input | Description | Required | Default |
-
-| -------------------- |
--------------------------------------------------------------- | -------- |
-------------------------- | | `github-token` | GitHub token to use for
-authentication | Yes | `${{ github.token }}` | | `base-branch` | The base branch
-to keep the pull requests updated with | Yes | Current branch or PR base | |
-`required-labels` | Comma-separated list of labels required to trigger the
-update | No | `''` | | `required-automerge` | If true, only update PRs with
-auto-merge enabled | No | `false` | | `avoided-labels` | Comma-separated list of
-labels that prevent updates if present | No | `''` |
+| Input                | Description                                                    | Required | Default                   |
+| -------------------- | -------------------------------------------------------------- | -------- | ------------------------- |
+| `github-token`       | GitHub token to use for authentication                         | Yes      | `${{ github.token }}`     |
+| `base-branch`        | The base branch to keep the pull requests updated with         | Yes      | Current branch or PR base |
+| `required-labels`    | Comma-separated list of labels required to trigger the update  | No       | `''`                      |
+| `required-automerge` | If true, only update PRs with auto-merge enabled               | No       | `false`                   |
+| `avoided-labels`     | Comma-separated list of labels that prevent updates if present | No       | `''`                      |
 
 ## Outputs
 
