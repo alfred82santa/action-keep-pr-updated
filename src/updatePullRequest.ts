@@ -1,3 +1,4 @@
+import * as core from '@actions/core'
 import { getOctokit } from '@actions/github'
 import { Config, PRResult } from './models.js'
 import { ListPullsParams, PullRequest } from './types.js'
@@ -31,12 +32,10 @@ export class Action {
         page: page++
       })
       for (const pr of response.data) {
-        console.log(`Found PR #${pr.number}: ${pr.title}`)
-        console.log(` - Labels: ${pr.labels.map((l) => l.name).join(', ')}`)
-        console.log(
-          ` - Auto-merge: ${pr.auto_merge ? 'enabled' : 'not enabled'}`
-        )
-        console.log(` - Base branch: ${pr.base.ref}`)
+        core.info(`Found PR #${pr.number}: ${pr.title}`)
+        core.info(` - Labels: ${pr.labels.map((l) => l.name).join(', ')}`)
+        core.info(` - Auto-merge: ${pr.auto_merge ? 'enabled' : 'not enabled'}`)
+        core.info(` - Base branch: ${pr.base.ref}`)
 
         yield pr
       }
@@ -51,9 +50,10 @@ export class Action {
     })
 
     if (!resp.status.toString().startsWith('2')) {
-      console.error(
+      core.error(
         `Failed to update PR #${prId} branch: ${resp.status} - ${resp.data}`
       )
+      core.error(JSON.stringify(resp))
       throw new Error(`Failed to update PR #${prId} branch: ${resp.status}`)
     }
   }
@@ -67,7 +67,7 @@ export class Action {
           .map((l) => l.name)
           .filter((name) => this.config.avoidedLabels.includes(name))
         if (hasAvoidedLabel.length > 0) {
-          console.log(
+          core.info(
             `Skipping PR #${pr.number} because it has avoided labels: ${hasAvoidedLabel.join(
               ', '
             )}`
@@ -77,14 +77,12 @@ export class Action {
         }
       }
       if (this.config.requiredAutomerge && pr.auto_merge == null) {
-        console.log(
-          `Skipping PR #${pr.number} because auto-merge is not enabled`
-        )
+        core.info(`Skipping PR #${pr.number} because auto-merge is not enabled`)
         prsResult.skipped.push(pr)
         continue
       }
 
-      console.log(`Updating PR #${pr.number} branch...`)
+      core.info(`Updating PR #${pr.number} branch...`)
       try {
         await this.updatePullRequestBranch(pr.number)
         prsResult.updated.push(pr)

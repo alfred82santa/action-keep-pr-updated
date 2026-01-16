@@ -31298,9 +31298,9 @@ class PRResult {
         coreExports.setOutput('pull-requests-skipped', this.skipped.map((pr) => pr.number));
     }
     report() {
-        console.log(`Pull requests updated: ${this.updated.length}`);
-        console.log(`Pull requests failed: ${this.failed.length}`);
-        console.log(`Pull requests skipped: ${this.skipped.length}`);
+        coreExports.info(`Pull requests updated: ${this.updated.length}`);
+        coreExports.info(`Pull requests failed: ${this.failed.length}`);
+        coreExports.info(`Pull requests skipped: ${this.skipped.length}`);
         coreExports.summary.addHeading(`Pull Request Updates Summary (${this.updated.length})`, 2);
         if (this.updated.length === 0) {
             coreExports.summary.addRaw('No pull requests were updated.');
@@ -31353,10 +31353,10 @@ class Action {
                 page: page++
             });
             for (const pr of response.data) {
-                console.log(`Found PR #${pr.number}: ${pr.title}`);
-                console.log(` - Labels: ${pr.labels.map((l) => l.name).join(', ')}`);
-                console.log(` - Auto-merge: ${pr.auto_merge ? 'enabled' : 'not enabled'}`);
-                console.log(` - Base branch: ${pr.base.ref}`);
+                coreExports.info(`Found PR #${pr.number}: ${pr.title}`);
+                coreExports.info(` - Labels: ${pr.labels.map((l) => l.name).join(', ')}`);
+                coreExports.info(` - Auto-merge: ${pr.auto_merge ? 'enabled' : 'not enabled'}`);
+                coreExports.info(` - Base branch: ${pr.base.ref}`);
                 yield pr;
             }
         } while (response.headers.link?.includes('rel="next"'));
@@ -31368,7 +31368,8 @@ class Action {
             pull_number: prId
         });
         if (!resp.status.toString().startsWith('2')) {
-            console.error(`Failed to update PR #${prId} branch: ${resp.status} - ${resp.data}`);
+            coreExports.error(`Failed to update PR #${prId} branch: ${resp.status} - ${resp.data}`);
+            coreExports.error(JSON.stringify(resp));
             throw new Error(`Failed to update PR #${prId} branch: ${resp.status}`);
         }
     }
@@ -31380,17 +31381,17 @@ class Action {
                     .map((l) => l.name)
                     .filter((name) => this.config.avoidedLabels.includes(name));
                 if (hasAvoidedLabel.length > 0) {
-                    console.log(`Skipping PR #${pr.number} because it has avoided labels: ${hasAvoidedLabel.join(', ')}`);
+                    coreExports.info(`Skipping PR #${pr.number} because it has avoided labels: ${hasAvoidedLabel.join(', ')}`);
                     prsResult.skipped.push(pr);
                     continue;
                 }
             }
             if (this.config.requiredAutomerge && pr.auto_merge == null) {
-                console.log(`Skipping PR #${pr.number} because auto-merge is not enabled`);
+                coreExports.info(`Skipping PR #${pr.number} because auto-merge is not enabled`);
                 prsResult.skipped.push(pr);
                 continue;
             }
-            console.log(`Updating PR #${pr.number} branch...`);
+            coreExports.info(`Updating PR #${pr.number} branch...`);
             try {
                 await this.updatePullRequestBranch(pr.number);
                 prsResult.updated.push(pr);

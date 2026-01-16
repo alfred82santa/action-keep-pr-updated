@@ -78,9 +78,9 @@ export class PRResult {
   }
 
   public report(): void {
-    console.log(`Pull requests updated: ${this.updated.length}`)
-    console.log(`Pull requests failed: ${this.failed.length}`)
-    console.log(`Pull requests skipped: ${this.skipped.length}`)
+    core.info(`Pull requests updated: ${this.updated.length}`)
+    core.info(`Pull requests failed: ${this.failed.length}`)
+    core.info(`Pull requests skipped: ${this.skipped.length}`)
 
     core.summary.addHeading(
       `Pull Request Updates Summary (${this.updated.length})`,
