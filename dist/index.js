@@ -31293,9 +31293,9 @@ class PRResult {
         this.skipped = skipped;
     }
     setOutputs() {
-        coreExports.setOutput('pull-requests-updated', this.updated);
-        coreExports.setOutput('pull-requests-failed', this.failed);
-        coreExports.setOutput('pull-requests-skipped', this.skipped);
+        coreExports.setOutput('pull-requests-updated', this.updated.map((pr) => pr.number));
+        coreExports.setOutput('pull-requests-failed', this.failed.map((pr) => pr.number));
+        coreExports.setOutput('pull-requests-skipped', this.skipped.map((pr) => pr.number));
     }
     report() {
         console.log(`Pull requests updated: ${this.updated.length}`);
@@ -31306,21 +31306,21 @@ class PRResult {
             coreExports.summary.addRaw('No pull requests were updated.');
         }
         else {
-            coreExports.summary.addList(this.updated.map((id) => `#${id}`));
+            coreExports.summary.addList(this.updated.map((pr) => `[#${pr.number} ${pr.title}](${pr.html_url})`));
         }
         coreExports.summary.addHeading(`Failed Pull Request Updates (${this.failed.length})`, 2);
         if (this.failed.length === 0) {
             coreExports.summary.addRaw('No pull request updates failed.');
         }
         else {
-            coreExports.summary.addList(this.failed.map((id) => `#${id}`));
+            coreExports.summary.addList(this.failed.map((pr) => `[#${pr.number} ${pr.title}](${pr.html_url})`));
         }
         coreExports.summary.addHeading(`Skipped Pull Requests (${this.skipped.length})`, 2);
         if (this.skipped.length === 0) {
             coreExports.summary.addRaw('No pull requests were skipped.');
         }
         else {
-            coreExports.summary.addList(this.skipped.map((id) => `#${id}`));
+            coreExports.summary.addList(this.skipped.map((pr) => `[#${pr.number} ${pr.title}](${pr.html_url})`));
         }
         coreExports.summary.write();
     }
@@ -31356,7 +31356,6 @@ class Action {
                 console.log(`Found PR #${pr.number}: ${pr.title}`);
                 console.log(` - Labels: ${pr.labels.map((l) => l.name).join(', ')}`);
                 console.log(` - Auto-merge: ${pr.auto_merge ? 'enabled' : 'not enabled'}`);
-                console.log(` - Draft: ${pr.draft ? 'yes' : 'no'}`);
                 console.log(` - Base branch: ${pr.base.ref}`);
                 yield pr;
             }
@@ -31379,22 +31378,25 @@ class Action {
             if (this.config.avoidedLabels.length > 0) {
                 const hasAvoidedLabel = pr.labels
                     .map((l) => l.name)
-                    .some((name) => this.config.avoidedLabels.includes(name));
-                if (hasAvoidedLabel) {
-                    prsResult.skipped.push(pr.number);
+                    .filter((name) => this.config.avoidedLabels.includes(name));
+                if (hasAvoidedLabel.length > 0) {
+                    console.log(`Skipping PR #${pr.number} because it has avoided labels: ${hasAvoidedLabel.join(', ')}`);
+                    prsResult.skipped.push(pr);
                     continue;
                 }
             }
             if (this.config.requiredAutomerge && pr.auto_merge == null) {
-                prsResult.skipped.push(pr.number);
+                console.log(`Skipping PR #${pr.number} because auto-merge is not enabled`);
+                prsResult.skipped.push(pr);
                 continue;
             }
+            console.log(`Updating PR #${pr.number} branch...`);
             try {
                 await this.updatePullRequestBranch(pr.number);
-                prsResult.updated.push(pr.number);
+                prsResult.updated.push(pr);
             }
             catch {
-                prsResult.failed.push(pr.number);
+                prsResult.failed.push(pr);
             }
         }
         return prsResult;

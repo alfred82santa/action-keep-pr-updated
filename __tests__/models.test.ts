@@ -201,7 +201,11 @@ describe('models.ts - Config', () => {
 
 describe('models.ts - PRResult', () => {
   it('Create from input values simple', async () => {
-    const result = new PRResult([1, 2], [3], [4, 5])
+    const result = new PRResult(
+      [github.pullRequestData(1), github.pullRequestData(2)],
+      [github.pullRequestData(3)],
+      [github.pullRequestData(4), github.pullRequestData(5)]
+    )
 
     result.setOutputs()
 
@@ -261,7 +265,11 @@ describe('models.ts - PRResult', () => {
   })
 
   it('Report results: with data', async () => {
-    const result = new PRResult([1, 2], [3], [4, 5])
+    const result = new PRResult(
+      [github.pullRequestData(1), github.pullRequestData(2)],
+      [github.pullRequestData(3)],
+      [github.pullRequestData(4), github.pullRequestData(5)]
+    )
 
     result.report()
 
@@ -270,19 +278,27 @@ describe('models.ts - PRResult', () => {
       'Pull Request Updates Summary (2)',
       2
     )
-    expect(core.summary.addList).toHaveBeenNthCalledWith(1, ['#1', '#2'])
+    expect(core.summary.addList).toHaveBeenNthCalledWith(1, [
+      '[#1 Test PR 1](https://github.com/test-owner/test-repo/pull/1)',
+      '[#2 Test PR 2](https://github.com/test-owner/test-repo/pull/2)'
+    ])
     expect(core.summary.addHeading).toHaveBeenNthCalledWith(
       2,
       'Failed Pull Request Updates (1)',
       2
     )
-    expect(core.summary.addList).toHaveBeenNthCalledWith(2, ['#3'])
+    expect(core.summary.addList).toHaveBeenNthCalledWith(2, [
+      '[#3 Test PR 3](https://github.com/test-owner/test-repo/pull/3)'
+    ])
     expect(core.summary.addHeading).toHaveBeenNthCalledWith(
       3,
       'Skipped Pull Requests (2)',
       2
     )
-    expect(core.summary.addList).toHaveBeenNthCalledWith(3, ['#4', '#5'])
+    expect(core.summary.addList).toHaveBeenNthCalledWith(3, [
+      '[#4 Test PR 4](https://github.com/test-owner/test-repo/pull/4)',
+      '[#5 Test PR 5](https://github.com/test-owner/test-repo/pull/5)'
+    ])
 
     expect(core.summary.addRaw).not.toHaveBeenCalled()
 

@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+import { PullRequest } from './types.js'
 
 function parseLabelsInput(input: string): string[] {
   return input
@@ -56,15 +57,24 @@ export class Config {
 
 export class PRResult {
   constructor(
-    public readonly updated: number[] = [],
-    public readonly failed: number[] = [],
-    public readonly skipped: number[] = []
+    public readonly updated: PullRequest[] = [],
+    public readonly failed: PullRequest[] = [],
+    public readonly skipped: PullRequest[] = []
   ) {}
 
   public setOutputs(): void {
-    core.setOutput('pull-requests-updated', this.updated)
-    core.setOutput('pull-requests-failed', this.failed)
-    core.setOutput('pull-requests-skipped', this.skipped)
+    core.setOutput(
+      'pull-requests-updated',
+      this.updated.map((pr) => pr.number)
+    )
+    core.setOutput(
+      'pull-requests-failed',
+      this.failed.map((pr) => pr.number)
+    )
+    core.setOutput(
+      'pull-requests-skipped',
+      this.skipped.map((pr) => pr.number)
+    )
   }
 
   public report(): void {
@@ -79,7 +89,9 @@ export class PRResult {
     if (this.updated.length === 0) {
       core.summary.addRaw('No pull requests were updated.')
     } else {
-      core.summary.addList(this.updated.map((id) => `#${id}`))
+      core.summary.addList(
+        this.updated.map((pr) => `[#${pr.number} ${pr.title}](${pr.html_url})`)
+      )
     }
 
     core.summary.addHeading(
@@ -89,14 +101,18 @@ export class PRResult {
     if (this.failed.length === 0) {
       core.summary.addRaw('No pull request updates failed.')
     } else {
-      core.summary.addList(this.failed.map((id) => `#${id}`))
+      core.summary.addList(
+        this.failed.map((pr) => `[#${pr.number} ${pr.title}](${pr.html_url})`)
+      )
     }
 
     core.summary.addHeading(`Skipped Pull Requests (${this.skipped.length})`, 2)
     if (this.skipped.length === 0) {
       core.summary.addRaw('No pull requests were skipped.')
     } else {
-      core.summary.addList(this.skipped.map((id) => `#${id}`))
+      core.summary.addList(
+        this.skipped.map((pr) => `[#${pr.number} ${pr.title}](${pr.html_url})`)
+      )
     }
     core.summary.write()
   }

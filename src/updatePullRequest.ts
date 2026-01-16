@@ -36,7 +36,6 @@ export class Action {
         console.log(
           ` - Auto-merge: ${pr.auto_merge ? 'enabled' : 'not enabled'}`
         )
-        console.log(` - Draft: ${pr.draft ? 'yes' : 'no'}`)
         console.log(` - Base branch: ${pr.base.ref}`)
 
         yield pr
@@ -66,21 +65,31 @@ export class Action {
       if (this.config.avoidedLabels.length > 0) {
         const hasAvoidedLabel = pr.labels
           .map((l) => l.name)
-          .some((name) => this.config.avoidedLabels.includes(name))
-        if (hasAvoidedLabel) {
-          prsResult.skipped.push(pr.number)
+          .filter((name) => this.config.avoidedLabels.includes(name))
+        if (hasAvoidedLabel.length > 0) {
+          console.log(
+            `Skipping PR #${pr.number} because it has avoided labels: ${hasAvoidedLabel.join(
+              ', '
+            )}`
+          )
+          prsResult.skipped.push(pr)
           continue
         }
       }
       if (this.config.requiredAutomerge && pr.auto_merge == null) {
-        prsResult.skipped.push(pr.number)
+        console.log(
+          `Skipping PR #${pr.number} because auto-merge is not enabled`
+        )
+        prsResult.skipped.push(pr)
         continue
       }
+
+      console.log(`Updating PR #${pr.number} branch...`)
       try {
         await this.updatePullRequestBranch(pr.number)
-        prsResult.updated.push(pr.number)
+        prsResult.updated.push(pr)
       } catch {
-        prsResult.failed.push(pr.number)
+        prsResult.failed.push(pr)
       }
     }
 

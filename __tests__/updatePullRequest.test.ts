@@ -380,7 +380,7 @@ describe('updatePullRequest.ts - Action', () => {
     })
 
     expect(result.updated).toHaveLength(1)
-    expect(result.updated).toContain(1)
+    expect(result.updated.map((pr) => pr.number)).toContain(1)
     expect(result.failed).toHaveLength(0)
     expect(result.skipped).toHaveLength(0)
   })
@@ -418,7 +418,7 @@ describe('updatePullRequest.ts - Action', () => {
     })
 
     expect(result.updated).toHaveLength(1)
-    expect(result.updated).toContain(1)
+    expect(result.updated.map((pr) => pr.number)).toContain(1)
     expect(result.failed).toHaveLength(0)
     expect(result.skipped).toHaveLength(0)
   })
@@ -454,7 +454,7 @@ describe('updatePullRequest.ts - Action', () => {
     expect(result.updated).toHaveLength(0)
     expect(result.failed).toHaveLength(0)
     expect(result.skipped).toHaveLength(1)
-    expect(result.skipped).toContain(1)
+    expect(result.skipped.map((pr) => pr.number)).toContain(1)
   })
 
   it('Invoke update all pull requests: One skipped because no automerge', async () => {
@@ -486,7 +486,7 @@ describe('updatePullRequest.ts - Action', () => {
     expect(result.updated).toHaveLength(0)
     expect(result.failed).toHaveLength(0)
     expect(result.skipped).toHaveLength(1)
-    expect(result.skipped).toContain(1)
+    expect(result.skipped.map((pr) => pr.number)).toContain(1)
   })
 
   it('Invoke update all pull requests: One success required auto merge', async () => {
@@ -522,7 +522,7 @@ describe('updatePullRequest.ts - Action', () => {
     })
 
     expect(result.updated).toHaveLength(1)
-    expect(result.updated).toContain(1)
+    expect(result.updated.map((pr) => pr.number)).toContain(1)
     expect(result.failed).toHaveLength(0)
     expect(result.skipped).toHaveLength(0)
   })
@@ -565,7 +565,7 @@ describe('updatePullRequest.ts - Action', () => {
 
     expect(result.updated).toHaveLength(0)
     expect(result.failed).toHaveLength(1)
-    expect(result.failed).toContain(1)
+    expect(result.failed.map((pr) => pr.number)).toContain(1)
     expect(result.skipped).toHaveLength(0)
   })
 })

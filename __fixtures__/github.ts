@@ -21,7 +21,8 @@ export function pullRequestData(
   return {
     id: nmb,
     number: nmb,
-    title: 'Test PR',
+    html_url: `https://github.com/test-owner/test-repo/pull/${nmb}`,
+    title: `Test PR ${nmb}`,
     body: 'This is a test pull request',
     head: {
       ref: 'feature-branch',

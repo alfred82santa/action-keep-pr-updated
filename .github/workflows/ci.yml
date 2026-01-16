@@ -62,3 +62,5 @@ jobs:
       - name: Test Local Action
         id: test-action
         uses: ./
+        with:
+          base-branch: ${{ github.ref_name }}
