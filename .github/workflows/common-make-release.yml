@@ -1,0 +1,85 @@
+name: Common make release
+
+on:
+  workflow_call:
+    inputs:
+      prereleaseLevel:
+        description: 'Prerelease level: rc, beta, alpha, dev'
+        type: string
+
+      moveReleasePointers:
+        description:
+          'For stable releases, this flag indicates that major and minor version
+          release tags must be move to new one'
+        type: boolean
+        default: true
+
+      isLatest:
+        description: 'Whether release must be flagged as latest'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  make-release:
+    name: Make release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Get current version
+        id: current-version
+        run: |
+          echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Calculate next version
+        id: next-version
+        uses: ./
+        with:
+          version: ${{ steps.current-version.outputs.version }}
+          level: ${{ inputs.prereleaseLevel }}
+          versionFormat: 'semver'
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: 'Release ${{ steps.next-version.outputs.version }}'
+          prerelease: ${{ !!steps.next-version.outputs.isPrerelease }}
+          tag_name: 'v${{ steps.next-version.outputs.version }}'
+          generate_release_notes: true
+          make_latest: ${{ inputs.isLatest }}
+          target_commitish: ${{ github.ref }}
+
+      - name: Creates or update minor release tag reference
+        uses: rickstaa/action-create-tag@v1
+        id: 'tag_minor_create'
+        if:
+          ${{ !steps.next-version.outputs.isPrerelease &&
+          inputs.moveReleasePointers }}
+        with:
+          tag: 'v${{ steps.next-version.outputs.baseReleaseMinor }}'
+          force_push_tag: true
+          message: 'Release ${{ steps.next-version.outputs.version }}'
+
+      - name: Creates or update major release tag reference
+        uses: rickstaa/action-create-tag@v1
+        id: 'tag_major_create'
+        if:
+          ${{ !steps.next-version.outputs.isPrerelease &&
+          inputs.moveReleasePointers }}
+        with:
+          tag: 'v${{ steps.next-version.outputs.major }}'
+          force_push_tag: true
+          message: 'Release ${{ steps.next-version.outputs.version }}'
