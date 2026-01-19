@@ -209,8 +209,9 @@ For example workflow runs, check out the
 > [!NOTE]
 >
 > You'll need to have a reasonably modern version of
-> [Node.js](https://nodejs.org) handy (24.x or later should work!). If you are
-> using a version manager like [`nodenv`](https://github.com/nodenv/nodenv) or
+> [Node.js](https://nodejs.org) handy that matches the version specified in the
+> `.node-version` file. If you are using a version manager like
+> [`nodenv`](https://github.com/nodenv/nodenv) or
 > [`fnm`](https://github.com/Schniz/fnm), this repository has a `.node-version`
 > file at the root that can be used to automatically switch to the correct
 > version when you `cd` into the repository.
