@@ -31378,7 +31378,7 @@ class Action {
                 const prLabelNames = pr.labels.map((l) => l.name);
                 const missingRequiredLabels = this.config.requiredLabels.filter((name) => !prLabelNames.includes(name));
                 if (missingRequiredLabels.length !== 0) {
-                    coreExports.info(`Skipping PR #${pr.number} because it has not some required labels: ${missingRequiredLabels.join(', ')}`);
+                    coreExports.info(`Skipping PR #${pr.number} because it does not have some required labels: ${missingRequiredLabels.join(', ')}`);
                     prsResult.skipped.push(pr);
                     continue;
                 }
