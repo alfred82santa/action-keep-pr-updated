@@ -31370,7 +31370,7 @@ class Action {
             repo: this.config.repo,
             pull_number: prId
         });
-        if (!resp.status.toString().startsWith('2')) {
+        if (resp.status < 200 || resp.status >= 300) {
             coreExports.error(`Failed to update PR #${prId} branch: ${resp.status} - ${resp.data}`);
             coreExports.error(JSON.stringify(resp));
             throw new Error(`Failed to update PR #${prId} branch: ${resp.status}`);
@@ -31389,7 +31389,7 @@ class Action {
                     continue;
                 }
             }
-            if (this.config.requiredAutomerge && pr.auto_merge == null) {
+            if (this.config.requiredAutomerge && pr.auto_merge === null) {
                 coreExports.info(`Skipping PR #${pr.number} because auto-merge is not enabled`);
                 prsResult.skipped.push(pr);
                 continue;
