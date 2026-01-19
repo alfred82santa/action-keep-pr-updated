@@ -10,5 +10,7 @@ jobs:
   update-prs:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v5
       - name: Keep PRs updated
         uses: ./
