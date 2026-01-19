@@ -76,7 +76,7 @@ export class Action {
           continue
         }
       }
-      if (this.config.requiredAutomerge && pr.auto_merge == null) {
+      if (this.config.requiredAutomerge && pr.auto_merge === null) {
         core.info(`Skipping PR #${pr.number} because auto-merge is not enabled`)
         prsResult.skipped.push(pr)
         continue
