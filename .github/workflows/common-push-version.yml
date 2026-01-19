@@ -66,7 +66,7 @@ jobs:
           npm version ${{ steps.define_version.outputs.version }} --no-git-tag-version --no-commit-hooks
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           title: 'Bump version to ${{ steps.define_version.outputs.version }}'
           branch: |
@@ -78,3 +78,4 @@ jobs:
           body: |
             :crown: *Automatic PR starting new version*
           labels: automated,bot
+          token: ${{ secrets.ACTION_GITHUB_TOKEN }}
