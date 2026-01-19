@@ -191,34 +191,14 @@ This action requires the following permissions:
 
 ```yaml
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 ```
 
-## Development
-
-For information on contributing to this action, see the development
-documentation below.
-
-```yaml
-steps:
-  - name: Checkout
-    id: checkout
-    uses: actions/checkout@v4
-
-  - name: Test Local Action
-    id: test-action
-    uses: ./
-    with:
-      milliseconds: 1000
-
-  - name: Print Output
-    id: output
-    run: echo "${{ steps.test-action.outputs.time }}"
-```
+## Example
 
 For example workflow runs, check out the
-[Actions tab](https://github.com/alfred82santa/action-keep-pr-updated/actions)!
+[our Keep PRs updated workflow](https://github.com/alfred82santa/action-keep-pr-updated/actions/workflows/keep-prs-updated.yml)!
 
 ---
 
@@ -229,7 +209,7 @@ For example workflow runs, check out the
 > [!NOTE]
 >
 > You'll need to have a reasonably modern version of
-> [Node.js](https://nodejs.org) handy (20.x or later should work!). If you are
+> [Node.js](https://nodejs.org) handy (24.x or later should work!). If you are
 > using a version manager like [`nodenv`](https://github.com/nodenv/nodenv) or
 > [`fnm`](https://github.com/Schniz/fnm), this repository has a `.node-version`
 > file at the root that can be used to automatically switch to the correct
@@ -290,16 +270,47 @@ You can provide a `.env` file to set environment variables and inputs. See
 
 ### Releasing
 
-This project uses semantic versioning. When releasing a new version:
+This project uses [Semantic Versioning](https://semver.org/).
 
-1. Update the version in `package.json`
-1. Create a new tag following the format `vX.X.X`
-1. Push the tag to trigger the release workflow
-1. Create a new GitHub release with the tag
+#### Automatic Releases
 
-For more information, see
-[Versioning](https://github.com/actions/toolkit/blob/main/docs/action-versioning.md)
-in the GitHub Actions toolkit.
+Releases are automatically generated on each push to specific branches:
+
+- **`main` branch**: Creates a beta release (e.g., `1.2.3-beta.1`)
+- **`release/*` branches**: Creates a release candidate (e.g., `1.2.3-rc.1`)
+
+#### Manual release
+
+To create a release, run the
+[Make a Release workflow](https://github.com/alfred82santa/action-keep-pr-updated/actions/workflows/manual-make-release.yml)
+on your chosen branch.
+
+##### Automatic Release Level
+
+When using the `automatic` release level, the type of release created depends on
+the source branch:
+
+- **`main` branch**: Creates a beta release (e.g., `1.2.3-beta.1`)
+- **`release/*` branches**: Creates a release candidate (e.g., `1.2.3-rc.1`)
+- **Other branches**: Creates an alpha release (e.g., `1.2.3-alpha.1`)
+
+##### Production Release Level
+
+When using the `production` release level:
+
+- Creates a new stable release (e.g., `1.2.3`)
+- If generated from a `release/*` branch, automatically creates a pull request
+  to bump the version to the next patch version
+
+> [!IMPORTANT]
+>
+> Stable releases must always be created from a `release/*` branch.
+
+#### Release Branch Management
+
+When a new `release/*` branch is created, the workflow automatically creates a
+pull request against the `main` branch to bump the version to the next minor
+version, ensuring the main branch stays ahead of the release branch.
 
 ## License
 

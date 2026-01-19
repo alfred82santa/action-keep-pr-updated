@@ -73,7 +73,6 @@ describe('updatePullRequest.ts - updatePullRequest', () => {
       state: 'open',
       owner: 'owner',
       repo: 'repo',
-      labels: '',
       per_page: 30,
       page: 1
     })
@@ -126,7 +125,6 @@ describe('updatePullRequest.ts - Action', () => {
       state: 'open',
       owner: 'owner',
       repo: 'repo',
-      labels: '',
       per_page: 30,
       page: 1
     })
@@ -158,7 +156,6 @@ describe('updatePullRequest.ts - Action', () => {
       state: 'open',
       owner: 'owner',
       repo: 'repo',
-      labels: '',
       per_page: 30,
       page: 1
     })
@@ -199,7 +196,6 @@ describe('updatePullRequest.ts - Action', () => {
       state: 'open',
       owner: 'owner',
       repo: 'repo',
-      labels: '',
       per_page: 30,
       page: 1
     })
@@ -208,7 +204,6 @@ describe('updatePullRequest.ts - Action', () => {
       state: 'open',
       owner: 'owner',
       repo: 'repo',
-      labels: '',
       per_page: 30,
       page: 2
     })
@@ -243,7 +238,6 @@ describe('updatePullRequest.ts - Action', () => {
       state: 'closed',
       owner: 'other_owner',
       repo: 'other_repo',
-      labels: 'bug',
       per_page: 10
     })) {
       prs.push(pullRequest)
@@ -256,7 +250,6 @@ describe('updatePullRequest.ts - Action', () => {
       state: 'closed',
       owner: 'other_owner',
       repo: 'other_repo',
-      labels: 'bug',
       per_page: 10,
       page: 1
     })
@@ -265,7 +258,6 @@ describe('updatePullRequest.ts - Action', () => {
       state: 'closed',
       owner: 'other_owner',
       repo: 'other_repo',
-      labels: 'bug',
       per_page: 10,
       page: 2
     })
@@ -336,7 +328,6 @@ describe('updatePullRequest.ts - Action', () => {
       state: 'open',
       owner: 'owner',
       repo: 'repo',
-      labels: '',
       per_page: 30,
       page: 1
     })
@@ -368,7 +359,51 @@ describe('updatePullRequest.ts - Action', () => {
       state: 'open',
       owner: 'owner',
       repo: 'repo',
-      labels: '',
+      per_page: 30,
+      page: 1
+    })
+    expect(octokit.rest.pulls.updateBranch).toHaveBeenCalledTimes(1)
+    expect(octokit.rest.pulls.updateBranch).toHaveBeenCalledWith({
+      owner: 'owner',
+      repo: 'repo',
+      pull_number: 1
+    })
+
+    expect(result.updated).toHaveLength(1)
+    expect(result.updated.map((pr) => pr.number)).toContain(1)
+    expect(result.failed).toHaveLength(0)
+    expect(result.skipped).toHaveLength(0)
+  })
+
+  it('Invoke update all pull requests: One success required label', async () => {
+    octokit.rest.pulls.list.mockResolvedValueOnce({
+      status: 200 as const,
+      data: [github.pullRequestData(1, ['required-label'])],
+      headers: {},
+      url: ''
+    })
+
+    const action = new Action(
+      new Config(
+        'owner',
+        'repo',
+        'token',
+        'main',
+        ['required-label'],
+        false,
+        []
+      ),
+      octokit as unknown as ReturnType<typeof github.getOctokit>
+    )
+
+    const result = await action.invokeUpdatePullRequests()
+
+    expect(octokit.rest.pulls.list).toHaveBeenCalledTimes(1)
+    expect(octokit.rest.pulls.list).toHaveBeenCalledWith({
+      base: 'main',
+      state: 'open',
+      owner: 'owner',
+      repo: 'repo',
       per_page: 30,
       page: 1
     })
@@ -406,7 +441,6 @@ describe('updatePullRequest.ts - Action', () => {
       state: 'open',
       owner: 'owner',
       repo: 'repo',
-      labels: '',
       per_page: 30,
       page: 1
     })
@@ -423,18 +457,24 @@ describe('updatePullRequest.ts - Action', () => {
     expect(result.skipped).toHaveLength(0)
   })
 
-  it('Invoke update all pull requests: One skipped because skipped label', async () => {
+  it('Invoke update all pull requests: One skipped because required label', async () => {
     octokit.rest.pulls.list.mockResolvedValueOnce({
       status: 200 as const,
-      data: [github.pullRequestData(1, ['skip-update'])],
+      data: [github.pullRequestData(1, [])],
       headers: {},
       url: ''
     })
 
     const action = new Action(
-      new Config('owner', 'repo', 'token', 'main', ['required-label'], false, [
-        'skip-update'
-      ]),
+      new Config(
+        'owner',
+        'repo',
+        'token',
+        'main',
+        ['required-label'],
+        false,
+        []
+      ),
       octokit as unknown as ReturnType<typeof github.getOctokit>
     )
 
@@ -444,7 +484,37 @@ describe('updatePullRequest.ts - Action', () => {
     expect(octokit.rest.pulls.list).toHaveBeenCalledWith({
       base: 'main',
       state: 'open',
-      labels: 'required-label',
+      owner: 'owner',
+      repo: 'repo',
+      per_page: 30,
+      page: 1
+    })
+    expect(octokit.rest.pulls.updateBranch).toHaveBeenCalledTimes(0)
+    expect(result.updated).toHaveLength(0)
+    expect(result.failed).toHaveLength(0)
+    expect(result.skipped).toHaveLength(1)
+    expect(result.skipped.map((pr) => pr.number)).toContain(1)
+  })
+
+  it('Invoke update all pull requests: One skipped because skipped label', async () => {
+    octokit.rest.pulls.list.mockResolvedValueOnce({
+      status: 200 as const,
+      data: [github.pullRequestData(1, ['skip-update'])],
+      headers: {},
+      url: ''
+    })
+
+    const action = new Action(
+      new Config('owner', 'repo', 'token', 'main', [], false, ['skip-update']),
+      octokit as unknown as ReturnType<typeof github.getOctokit>
+    )
+
+    const result = await action.invokeUpdatePullRequests()
+
+    expect(octokit.rest.pulls.list).toHaveBeenCalledTimes(1)
+    expect(octokit.rest.pulls.list).toHaveBeenCalledWith({
+      base: 'main',
+      state: 'open',
       owner: 'owner',
       repo: 'repo',
       per_page: 30,
@@ -476,7 +546,6 @@ describe('updatePullRequest.ts - Action', () => {
     expect(octokit.rest.pulls.list).toHaveBeenCalledWith({
       base: 'main',
       state: 'open',
-      labels: '',
       owner: 'owner',
       repo: 'repo',
       per_page: 30,
@@ -510,7 +579,6 @@ describe('updatePullRequest.ts - Action', () => {
       state: 'open',
       owner: 'owner',
       repo: 'repo',
-      labels: '',
       per_page: 30,
       page: 1
     })
@@ -555,7 +623,6 @@ describe('updatePullRequest.ts - Action', () => {
         state: 'open',
         owner: 'owner',
         repo: 'repo',
-        labels: '',
         per_page: 30,
         page: 1
       })

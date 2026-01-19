@@ -5,7 +5,7 @@ on:
     branches:
       - release/*
 
-run-name: Bump version in main because ${{ github.ref_name }} pushed.
+run-name: Bump version in main after push to ${{ github.ref_name }}.
 
 permissions:
   contents: write
