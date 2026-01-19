@@ -3,6 +3,9 @@ on:
   workflow_dispatch:
   push:
 
+permissions:
+  contents: read
+
 jobs:
   update-prs:
     runs-on: ubuntu-latest

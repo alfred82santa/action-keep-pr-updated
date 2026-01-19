@@ -94,7 +94,7 @@ jobs:
     name: Bump version
     needs: make-release
     if:
-      github.ref_name == format('release/%s',
+      github.ref_name == format('release/{0}',
       needs.make-release.outputs.minorVersion) && inputs.preReleaseLevel ==
       'none'
     uses: ./.github/workflows/common-push-version.yml
