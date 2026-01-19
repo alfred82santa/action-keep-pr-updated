@@ -527,45 +527,49 @@ describe('updatePullRequest.ts - Action', () => {
     expect(result.skipped).toHaveLength(0)
   })
 
-  it('Invoke update all pull requests: One error', async () => {
-    octokit.rest.pulls.list.mockResolvedValueOnce({
-      status: 200 as const,
-      data: [github.pullRequestData(1, [], true)],
-      headers: {},
-      url: ''
-    })
+  it.each([
+    { desc: 'string', error: 'Update failed' },
+    { desc: 'exception', error: new Error('Update failed') }
+  ])(
+    'Invoke update all pull requests: One error ($desc)',
+    async ({ error }) => {
+      octokit.rest.pulls.list.mockResolvedValueOnce({
+        status: 200 as const,
+        data: [github.pullRequestData(1)],
+        headers: {},
+        url: ''
+      })
 
-    octokit.rest.pulls.updateBranch.mockRejectedValueOnce(
-      new Error('Update failed')
-    )
+      octokit.rest.pulls.updateBranch.mockRejectedValueOnce(error)
 
-    const action = new Action(
-      new Config('owner', 'repo', 'token', 'main', [], true, []),
-      octokit as unknown as ReturnType<typeof github.getOctokit>
-    )
+      const action = new Action(
+        new Config('owner', 'repo', 'token', 'main', [], false, []),
+        octokit as unknown as ReturnType<typeof github.getOctokit>
+      )
 
-    const result = await action.invokeUpdatePullRequests()
+      const result = await action.invokeUpdatePullRequests()
 
-    expect(octokit.rest.pulls.list).toHaveBeenCalledTimes(1)
-    expect(octokit.rest.pulls.list).toHaveBeenCalledWith({
-      base: 'main',
-      state: 'open',
-      owner: 'owner',
-      repo: 'repo',
-      labels: '',
-      per_page: 30,
-      page: 1
-    })
-    expect(octokit.rest.pulls.updateBranch).toHaveBeenCalledTimes(1)
-    expect(octokit.rest.pulls.updateBranch).toHaveBeenCalledWith({
-      owner: 'owner',
-      repo: 'repo',
-      pull_number: 1
-    })
+      expect(octokit.rest.pulls.list).toHaveBeenCalledTimes(1)
+      expect(octokit.rest.pulls.list).toHaveBeenCalledWith({
+        base: 'main',
+        state: 'open',
+        owner: 'owner',
+        repo: 'repo',
+        labels: '',
+        per_page: 30,
+        page: 1
+      })
+      expect(octokit.rest.pulls.updateBranch).toHaveBeenCalledTimes(1)
+      expect(octokit.rest.pulls.updateBranch).toHaveBeenCalledWith({
+        owner: 'owner',
+        repo: 'repo',
+        pull_number: 1
+      })
 
-    expect(result.updated).toHaveLength(0)
-    expect(result.failed).toHaveLength(1)
-    expect(result.failed.map((pr) => pr.number)).toContain(1)
-    expect(result.skipped).toHaveLength(0)
-  })
+      expect(result.updated).toHaveLength(0)
+      expect(result.failed).toHaveLength(1)
+      expect(result.failed.map((pr) => pr.number)).toContain(1)
+      expect(result.skipped).toHaveLength(0)
+    }
+  )
 })
