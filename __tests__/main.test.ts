@@ -6,57 +6,156 @@
  * so that the actual '@actions/core' module is not imported.
  */
 import { jest } from '@jest/globals'
-import * as core from '../__fixtures__/core.js'
-import { wait } from '../__fixtures__/wait.js'
+import * as core from '../__fixtures__/core.ts'
+import { updatePullRequest } from '../__fixtures__/updatePullRequest.ts'
+import { Config, PRResult } from '../__fixtures__/models.ts'
+import { Config as ConfigOriginal } from '../src/models.js'
 
 // Mocks should be declared before the module being tested is imported.
 jest.unstable_mockModule('@actions/core', () => core)
-jest.unstable_mockModule('../src/wait.js', () => ({ wait }))
+jest.unstable_mockModule('../src/updatePullRequest.ts', () => ({
+  updatePullRequest
+}))
+
+jest.unstable_mockModule('../src/models.ts', () => ({
+  Config
+}))
 
 // The module being tested should be imported dynamically. This ensures that the
 // mocks are used in place of any actual dependencies.
-const { run } = await import('../src/main.js')
+const { run } = await import('../src/main.ts')
+
+const mockPRResult = jest.mocked(PRResult.prototype)
 
 describe('main.ts', () => {
   beforeEach(() => {
-    // Set the action's inputs as return values from core.getInput().
-    core.getInput.mockImplementation(() => '500')
-
-    // Mock the wait function so that it does not actually wait.
-    wait.mockImplementation(() => Promise.resolve('done!'))
+    Config.fromCoreInputs.mockReturnValue(
+      new ConfigOriginal(
+        'test-owner',
+        'test-repo',
+        'test-token',
+        'main',
+        [],
+        false,
+        []
+      )
+    )
+    updatePullRequest.mockResolvedValue(mockPRResult)
+    jest.spyOn(mockPRResult, 'setOutputs').mockImplementation(() => {})
+    jest.spyOn(mockPRResult, 'report').mockImplementation(async () => {})
   })
 
   afterEach(() => {
     jest.resetAllMocks()
   })
 
-  it('Sets the time output', async () => {
+  it('Successful process', async () => {
     await run()
 
-    // Verify the time output was set.
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      1,
-      'time',
-      // Simple regex to match a time string in the format HH:MM:SS.
-      expect.stringMatching(/^\d{2}:\d{2}:\d{2}/)
+    expect(Config.fromCoreInputs).toHaveBeenCalledTimes(1)
+    expect(updatePullRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        owner: 'test-owner',
+        repo: 'test-repo',
+        githubToken: 'test-token',
+        baseBranch: 'main',
+        requiredLabels: [],
+        requiredAutomerge: false,
+        avoidedLabels: []
+      })
+    )
+    expect(mockPRResult.setOutputs).toHaveBeenCalledTimes(1)
+    expect(core.debug).toHaveBeenCalledWith(
+      expect.stringMatching(
+        /^Using config .*(?<=.*\*\*\*.*)(?<!.*test-token.*)$/
+      )
+    )
+
+    expect(core.debug).toHaveBeenCalledWith(
+      expect.stringMatching(/Action result:/)
     )
   })
 
-  it('Sets a failed status', async () => {
-    // Clear the getInput mock and return an invalid value.
-    core.getInput.mockClear().mockReturnValueOnce('this is not a number')
-
-    // Clear the wait mock and return a rejected promise.
-    wait
-      .mockClear()
-      .mockRejectedValueOnce(new Error('milliseconds is not a number'))
+  it('Error on get inputs', async () => {
+    Config.fromCoreInputs.mockImplementation(() => {
+      throw new Error('Failed to get inputs')
+    })
 
     await run()
 
-    // Verify that the action was marked as failed.
-    expect(core.setFailed).toHaveBeenNthCalledWith(
-      1,
-      'milliseconds is not a number'
+    expect(Config.fromCoreInputs).toHaveBeenCalledTimes(1)
+
+    expect(updatePullRequest).toHaveBeenCalledTimes(0)
+    expect(mockPRResult.setOutputs).toHaveBeenCalledTimes(0)
+    expect(core.setFailed).toHaveBeenCalledWith('Failed to get inputs')
+    expect(core.error).toHaveBeenCalledWith(
+      expect.stringMatching(/An error occurred while running the action:/)
+    )
+  })
+
+  it('Error on update branches', async () => {
+    updatePullRequest.mockImplementation(() => {
+      throw new Error('Failed to update branches')
+    })
+
+    await run()
+
+    expect(Config.fromCoreInputs).toHaveBeenCalledTimes(1)
+
+    expect(updatePullRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        owner: 'test-owner',
+        repo: 'test-repo',
+        githubToken: 'test-token',
+        baseBranch: 'main',
+        requiredLabels: [],
+        requiredAutomerge: false,
+        avoidedLabels: []
+      })
+    )
+    expect(mockPRResult.setOutputs).toHaveBeenCalledTimes(0)
+    expect(core.debug).toHaveBeenCalledWith(
+      expect.stringMatching(
+        /^Using config .*(?<=.*\*\*\*.*)(?<!.*test-token.*)$/
+      )
+    )
+    expect(core.setFailed).toHaveBeenCalledWith('Failed to update branches')
+    expect(core.error).toHaveBeenCalledWith(
+      expect.stringMatching(/An error occurred while running the action:/)
+    )
+  })
+
+  it('Error string on update branches', async () => {
+    updatePullRequest.mockImplementation(() => {
+      throw 'Failed to update branches'
+    })
+
+    await run()
+
+    expect(Config.fromCoreInputs).toHaveBeenCalledTimes(1)
+
+    expect(updatePullRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        owner: 'test-owner',
+        repo: 'test-repo',
+        githubToken: 'test-token',
+        baseBranch: 'main',
+        requiredLabels: [],
+        requiredAutomerge: false,
+        avoidedLabels: []
+      })
+    )
+    expect(mockPRResult.setOutputs).toHaveBeenCalledTimes(0)
+    expect(core.debug).toHaveBeenCalledWith(
+      expect.stringMatching(
+        /^Using config .*(?<=.*\*\*\*.*)(?<!.*test-token.*)$/
+      )
+    )
+    expect(core.setFailed).toHaveBeenCalledWith(
+      'An unknown error occurred: Failed to update branches'
+    )
+    expect(core.error).toHaveBeenCalledWith(
+      expect.stringMatching(/An error occurred while running the action:/)
     )
   })
 })

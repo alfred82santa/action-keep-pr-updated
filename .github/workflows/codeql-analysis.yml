@@ -16,6 +16,12 @@ permissions:
   contents: read
   security-events: write
 
+concurrency:
+  group:
+    ${{ github.workflow }}-${{ github.base_ref }}-${{ github.ref }}-${{
+    github.event_name}}
+  cancel-in-progress: true
+
 jobs:
   analyze:
     name: Analyze
