@@ -11,7 +11,7 @@ function parseLabelsInput(input: string): string[] {
 }
 
 function buildPullRequestLink(pr: PullRequest): string {
-  return `<a href="${pr.html_url}" target="_blank">:git-pull-request: #${pr.number} ${pr.title}</a>`
+  return `<a href="${pr.html_url}" target="_blank">#${pr.number} ${pr.title}</a>`
 }
 
 export class Config {

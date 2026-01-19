@@ -31249,7 +31249,7 @@ function parseLabelsInput(input) {
         .filter((label) => label.length > 0);
 }
 function buildPullRequestLink(pr) {
-    return `<a href="${pr.html_url}" target="_blank">:git-pull-request: #${pr.number} ${pr.title}</a>`;
+    return `<a href="${pr.html_url}" target="_blank">#${pr.number} ${pr.title}</a>`;
 }
 class Config {
     owner;
@@ -31399,7 +31399,8 @@ class Action {
                 await this.updatePullRequestBranch(pr.number);
                 prsResult.updated.push(pr);
             }
-            catch {
+            catch (error) {
+                coreExports.error(`Failed to update PR #${pr.number} branch: ${error instanceof Error ? error.message : String(error)}`);
                 prsResult.failed.push(pr);
             }
         }
