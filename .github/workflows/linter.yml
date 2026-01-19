@@ -18,6 +18,12 @@ permissions:
   packages: read
   statuses: write
 
+concurrency:
+  group:
+    ${{ github.workflow }}-${{ github.base_ref }}-${{ github.ref }}-${{
+    github.event_name}}
+  cancel-in-progress: true
+
 jobs:
   lint:
     name: Lint Codebase
@@ -57,3 +63,5 @@ jobs:
           VALIDATE_JSCPD: false
           VALIDATE_TYPESCRIPT_ES: false
           VALIDATE_JSON: false
+          VALIDATE_TRIVY: false
+          VALIDATE_TYPESCRIPT_PRETTIER: false
