@@ -41,7 +41,7 @@ outputs:
   pull-requests-skipped:
     description: 'Indicates which pull requests were skipped.'
   pull-requests-failed:
-    description: 'Indicates what pull requests failed to update.'
+    description: 'Indicates which pull requests failed to update.'
 
 runs:
   using: node24
