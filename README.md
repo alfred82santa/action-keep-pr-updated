@@ -191,34 +191,14 @@ This action requires the following permissions:
 
 ```yaml
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 ```
 
-## Development
-
-For information on contributing to this action, see the development
-documentation below.
-
-```yaml
-steps:
-  - name: Checkout
-    id: checkout
-    uses: actions/checkout@v4
-
-  - name: Test Local Action
-    id: test-action
-    uses: ./
-    with:
-      milliseconds: 1000
-
-  - name: Print Output
-    id: output
-    run: echo "${{ steps.test-action.outputs.time }}"
-```
+## Example
 
 For example workflow runs, check out the
-[Actions tab](https://github.com/alfred82santa/action-keep-pr-updated/actions)!
+[our Keep PRs updated workflow](https://github.com/alfred82santa/action-keep-pr-updated/actions/workflows/keep-prs-updated.yml)!
 
 ---
 
@@ -229,7 +209,7 @@ For example workflow runs, check out the
 > [!NOTE]
 >
 > You'll need to have a reasonably modern version of
-> [Node.js](https://nodejs.org) handy (20.x or later should work!). If you are
+> [Node.js](https://nodejs.org) handy (24.x or later should work!). If you are
 > using a version manager like [`nodenv`](https://github.com/nodenv/nodenv) or
 > [`fnm`](https://github.com/Schniz/fnm), this repository has a `.node-version`
 > file at the root that can be used to automatically switch to the correct
@@ -292,7 +272,11 @@ You can provide a `.env` file to set environment variables and inputs. See
 
 This project uses semantic versioning. When releasing a new version:
 
-1. Update the version in `package.json`
+1. Run [make a release workflow]() on a choosen branchs.
+   - On `main` branch it will make a beta release.
+   - On `release/*` branches it will make a release candidate release.
+   - On other any branch it will make a alpha release.
+
 1. Create a new tag following the format `vX.X.X`
 1. Push the tag to trigger the release workflow
 1. Create a new GitHub release with the tag

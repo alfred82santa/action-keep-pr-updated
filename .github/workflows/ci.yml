@@ -63,3 +63,4 @@ jobs:
         uses: ./
         with:
           base-branch: ${{ github.head_ref || github.ref_name }}
+          required-labels: 'dry-run'
