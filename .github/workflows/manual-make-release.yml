@@ -5,8 +5,8 @@ on:
     inputs:
       prereleaseLevel:
         description: |
-          Release level. By default it us rc on release/* branches, beta on
-          main branches and alpha on any else.
+          Release level. By default it is rc on release/* branches, beta on
+          main branches and alpha on anything else.
         default: 'automatic'
         type: choice
         options:
