@@ -49,7 +49,7 @@ export class Action {
       pull_number: prId
     })
 
-    if (!resp.status.toString().startsWith('2')) {
+    if (resp.status < 200 || resp.status >= 300) {
       core.error(
         `Failed to update PR #${prId} branch: ${resp.status} - ${resp.data}`
       )
