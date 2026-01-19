@@ -272,7 +272,7 @@ You can provide a `.env` file to set environment variables and inputs. See
 
 This project uses semantic versioning. When releasing a new version:
 
-1. Run [make a release workflow]() on a choosen branchs.
+1. Run [make a release workflow]() on chosen branches.
    - On `main` branch it will make a beta release.
    - On `release/*` branches it will make a release candidate release.
    - On other any branch it will make a alpha release.
