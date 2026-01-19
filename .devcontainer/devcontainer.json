@@ -37,5 +37,8 @@
   "features": {
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers-community/npm-features/prettier:1": {}
-  }
+  },
+  "mounts": [
+    "source=${localWorkspaceFolder}/tmp,target=/tmp,type=bind,consistency=cached"
+  ]
 }
