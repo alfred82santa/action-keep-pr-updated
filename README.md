@@ -270,20 +270,47 @@ You can provide a `.env` file to set environment variables and inputs. See
 
 ### Releasing
 
-This project uses semantic versioning. When releasing a new version:
+This project uses [Semantic Versioning](https://semver.org/).
 
-1. Run [make a release workflow]() on chosen branches.
-   - On `main` branch it will make a beta release.
-   - On `release/*` branches it will make a release candidate release.
-   - On other any branch it will make a alpha release.
+#### Automatic Releases
 
-1. Create a new tag following the format `vX.X.X`
-1. Push the tag to trigger the release workflow
-1. Create a new GitHub release with the tag
+Releases are automatically generated on each push to specific branches:
 
-For more information, see
-[Versioning](https://github.com/actions/toolkit/blob/main/docs/action-versioning.md)
-in the GitHub Actions toolkit.
+- **`main` branch**: Creates a beta release (e.g., `1.2.3-beta.1`)
+- **`release/*` branches**: Creates a release candidate (e.g., `1.2.3-rc.1`)
+
+#### Manual release
+
+To create a release, run the
+[Make a Release workflow](https://github.com/alfred82santa/action-keep-pr-updated/actions/workflows/manual-make-release.yml)
+on your chosen branch.
+
+##### Automatic Release Level
+
+When using the `automatic` release level, the type of release created depends on
+the source branch:
+
+- **`main` branch**: Creates a beta release (e.g., `1.2.3-beta.1`)
+- **`release/*` branches**: Creates a release candidate (e.g., `1.2.3-rc.1`)
+- **Other branches**: Creates an alpha release (e.g., `1.2.3-alpha.1`)
+
+##### Production Release Level
+
+When using the `production` release level:
+
+- Creates a new stable release (e.g., `1.2.3`)
+- If generated from a `release/*` branch, automatically creates a pull request
+  to bump the version to the next patch version
+
+> [!IMPORTANT]
+>
+> Stable releases must always be created from a `release/*` branch.
+
+#### Release Branch Management
+
+When a new `release/*` branch is created, the workflow automatically creates a
+pull request against the `main` branch to bump the version to the next minor
+version, ensuring the main branch stays ahead of the release branch.
 
 ## License
 
