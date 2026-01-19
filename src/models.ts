@@ -10,6 +10,10 @@ function parseLabelsInput(input: string): string[] {
     .filter((label) => label.length > 0)
 }
 
+function buildPullRequestLink(pr: PullRequest): string {
+  return `<a href="${pr.html_url}" target="_blank">#${pr.number} ${pr.title}</a>`
+}
+
 export class Config {
   constructor(
     public readonly owner: string,
@@ -77,7 +81,7 @@ export class PRResult {
     )
   }
 
-  public report(): void {
+  public async report(): Promise<void> {
     core.info(`Pull requests updated: ${this.updated.length}`)
     core.info(`Pull requests failed: ${this.failed.length}`)
     core.info(`Pull requests skipped: ${this.skipped.length}`)
@@ -89,9 +93,7 @@ export class PRResult {
     if (this.updated.length === 0) {
       core.summary.addRaw('No pull requests were updated.')
     } else {
-      core.summary.addList(
-        this.updated.map((pr) => `[#${pr.number} ${pr.title}](${pr.html_url})`)
-      )
+      core.summary.addList(this.updated.map((pr) => buildPullRequestLink(pr)))
     }
 
     core.summary.addHeading(
@@ -101,19 +103,16 @@ export class PRResult {
     if (this.failed.length === 0) {
       core.summary.addRaw('No pull request updates failed.')
     } else {
-      core.summary.addList(
-        this.failed.map((pr) => `[#${pr.number} ${pr.title}](${pr.html_url})`)
-      )
+      core.summary.addList(this.failed.map((pr) => buildPullRequestLink(pr)))
     }
 
     core.summary.addHeading(`Skipped Pull Requests (${this.skipped.length})`, 2)
     if (this.skipped.length === 0) {
       core.summary.addRaw('No pull requests were skipped.')
     } else {
-      core.summary.addList(
-        this.skipped.map((pr) => `[#${pr.number} ${pr.title}](${pr.html_url})`)
-      )
+      core.summary.addList(this.skipped.map((pr) => buildPullRequestLink(pr)))
     }
-    core.summary.write()
+
+    await core.summary.write()
   }
 }

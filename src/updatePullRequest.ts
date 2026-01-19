@@ -49,7 +49,7 @@ export class Action {
       pull_number: prId
     })
 
-    if (!resp.status.toString().startsWith('2')) {
+    if (resp.status < 200 || resp.status >= 300) {
       core.error(
         `Failed to update PR #${prId} branch: ${resp.status} - ${resp.data}`
       )
@@ -76,7 +76,7 @@ export class Action {
           continue
         }
       }
-      if (this.config.requiredAutomerge && pr.auto_merge == null) {
+      if (this.config.requiredAutomerge && pr.auto_merge === null) {
         core.info(`Skipping PR #${pr.number} because auto-merge is not enabled`)
         prsResult.skipped.push(pr)
         continue
@@ -86,7 +86,12 @@ export class Action {
       try {
         await this.updatePullRequestBranch(pr.number)
         prsResult.updated.push(pr)
-      } catch {
+      } catch (error) {
+        core.error(
+          `Failed to update PR #${pr.number} branch: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        )
         prsResult.failed.push(pr)
       }
     }

@@ -279,8 +279,8 @@ describe('models.ts - PRResult', () => {
       2
     )
     expect(core.summary.addList).toHaveBeenNthCalledWith(1, [
-      '[#1 Test PR 1](https://github.com/test-owner/test-repo/pull/1)',
-      '[#2 Test PR 2](https://github.com/test-owner/test-repo/pull/2)'
+      '<a href="https://github.com/test-owner/test-repo/pull/1" target="_blank">#1 Test PR 1</a>',
+      '<a href="https://github.com/test-owner/test-repo/pull/2" target="_blank">#2 Test PR 2</a>'
     ])
     expect(core.summary.addHeading).toHaveBeenNthCalledWith(
       2,
@@ -288,7 +288,7 @@ describe('models.ts - PRResult', () => {
       2
     )
     expect(core.summary.addList).toHaveBeenNthCalledWith(2, [
-      '[#3 Test PR 3](https://github.com/test-owner/test-repo/pull/3)'
+      '<a href="https://github.com/test-owner/test-repo/pull/3" target="_blank">#3 Test PR 3</a>'
     ])
     expect(core.summary.addHeading).toHaveBeenNthCalledWith(
       3,
@@ -296,8 +296,8 @@ describe('models.ts - PRResult', () => {
       2
     )
     expect(core.summary.addList).toHaveBeenNthCalledWith(3, [
-      '[#4 Test PR 4](https://github.com/test-owner/test-repo/pull/4)',
-      '[#5 Test PR 5](https://github.com/test-owner/test-repo/pull/5)'
+      '<a href="https://github.com/test-owner/test-repo/pull/4" target="_blank">#4 Test PR 4</a>',
+      '<a href="https://github.com/test-owner/test-repo/pull/5" target="_blank">#5 Test PR 5</a>'
     ])
 
     expect(core.summary.addRaw).not.toHaveBeenCalled()

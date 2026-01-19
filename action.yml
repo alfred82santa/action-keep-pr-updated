@@ -37,11 +37,11 @@ inputs:
 # Define your outputs here.
 outputs:
   pull-requests-updated:
-    description: 'Indicates what pull requests has been updated.'
+    description: 'Indicates which pull requests have been updated.'
   pull-requests-skipped:
-    description: 'Indicates what pull requests were skipped.'
+    description: 'Indicates which pull requests were skipped.'
   pull-requests-failed:
-    description: 'Indicates what pull requests failed to update.'
+    description: 'Indicates which pull requests failed to update.'
 
 runs:
   using: node24

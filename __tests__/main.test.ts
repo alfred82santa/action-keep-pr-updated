@@ -42,7 +42,7 @@ describe('main.ts', () => {
     )
     updatePullRequest.mockResolvedValue(mockPRResult)
     jest.spyOn(mockPRResult, 'setOutputs').mockImplementation(() => {})
-    jest.spyOn(mockPRResult, 'report').mockImplementation(() => {})
+    jest.spyOn(mockPRResult, 'report').mockImplementation(async () => {})
   })
 
   afterEach(() => {

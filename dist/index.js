@@ -31248,6 +31248,9 @@ function parseLabelsInput(input) {
         .map((label) => label.trim())
         .filter((label) => label.length > 0);
 }
+function buildPullRequestLink(pr) {
+    return `<a href="${pr.html_url}" target="_blank">#${pr.number} ${pr.title}</a>`;
+}
 class Config {
     owner;
     repo;
@@ -31297,7 +31300,7 @@ class PRResult {
         coreExports.setOutput('pull-requests-failed', this.failed.map((pr) => pr.number));
         coreExports.setOutput('pull-requests-skipped', this.skipped.map((pr) => pr.number));
     }
-    report() {
+    async report() {
         coreExports.info(`Pull requests updated: ${this.updated.length}`);
         coreExports.info(`Pull requests failed: ${this.failed.length}`);
         coreExports.info(`Pull requests skipped: ${this.skipped.length}`);
@@ -31306,23 +31309,23 @@ class PRResult {
             coreExports.summary.addRaw('No pull requests were updated.');
         }
         else {
-            coreExports.summary.addList(this.updated.map((pr) => `[#${pr.number} ${pr.title}](${pr.html_url})`));
+            coreExports.summary.addList(this.updated.map((pr) => buildPullRequestLink(pr)));
         }
         coreExports.summary.addHeading(`Failed Pull Request Updates (${this.failed.length})`, 2);
         if (this.failed.length === 0) {
             coreExports.summary.addRaw('No pull request updates failed.');
         }
         else {
-            coreExports.summary.addList(this.failed.map((pr) => `[#${pr.number} ${pr.title}](${pr.html_url})`));
+            coreExports.summary.addList(this.failed.map((pr) => buildPullRequestLink(pr)));
         }
         coreExports.summary.addHeading(`Skipped Pull Requests (${this.skipped.length})`, 2);
         if (this.skipped.length === 0) {
             coreExports.summary.addRaw('No pull requests were skipped.');
         }
         else {
-            coreExports.summary.addList(this.skipped.map((pr) => `[#${pr.number} ${pr.title}](${pr.html_url})`));
+            coreExports.summary.addList(this.skipped.map((pr) => buildPullRequestLink(pr)));
         }
-        coreExports.summary.write();
+        await coreExports.summary.write();
     }
 }
 
@@ -31367,7 +31370,7 @@ class Action {
             repo: this.config.repo,
             pull_number: prId
         });
-        if (!resp.status.toString().startsWith('2')) {
+        if (resp.status < 200 || resp.status >= 300) {
             coreExports.error(`Failed to update PR #${prId} branch: ${resp.status} - ${resp.data}`);
             coreExports.error(JSON.stringify(resp));
             throw new Error(`Failed to update PR #${prId} branch: ${resp.status}`);
@@ -31386,7 +31389,7 @@ class Action {
                     continue;
                 }
             }
-            if (this.config.requiredAutomerge && pr.auto_merge == null) {
+            if (this.config.requiredAutomerge && pr.auto_merge === null) {
                 coreExports.info(`Skipping PR #${pr.number} because auto-merge is not enabled`);
                 prsResult.skipped.push(pr);
                 continue;
@@ -31396,7 +31399,8 @@ class Action {
                 await this.updatePullRequestBranch(pr.number);
                 prsResult.updated.push(pr);
             }
-            catch {
+            catch (error) {
+                coreExports.error(`Failed to update PR #${pr.number} branch: ${error instanceof Error ? error.message : String(error)}`);
                 prsResult.failed.push(pr);
             }
         }
@@ -31421,7 +31425,7 @@ async function run() {
         const result = await updatePullRequest(config);
         coreExports.debug(`Action result: ${JSON.stringify(result)}...`);
         // Report results to summary
-        result.report();
+        await result.report();
         // Set outputs for other workflow steps to use
         result.setOutputs();
     }
