@@ -2,14 +2,13 @@ name: Continuous Integration
 
 on:
   pull_request:
-    branches:
-      - main
   push:
     branches:
       - main
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
 
 concurrency:
   group:
@@ -63,4 +62,4 @@ jobs:
         id: test-action
         uses: ./
         with:
-          base-branch: ${{ github.ref_name }}
+          base-branch: ${{ github.head_ref || github.ref_name }}

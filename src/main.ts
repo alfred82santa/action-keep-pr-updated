@@ -18,7 +18,7 @@ export async function run(): Promise<void> {
     core.debug(`Action result: ${JSON.stringify(result)}...`)
 
     // Report results to summary
-    result.report()
+    await result.report()
     // Set outputs for other workflow steps to use
     result.setOutputs()
   } catch (error) {

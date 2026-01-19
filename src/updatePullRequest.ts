@@ -86,7 +86,12 @@ export class Action {
       try {
         await this.updatePullRequestBranch(pr.number)
         prsResult.updated.push(pr)
-      } catch {
+      } catch (error) {
+        core.error(
+          `Failed to update PR #${pr.number} branch: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        )
         prsResult.failed.push(pr)
       }
     }
