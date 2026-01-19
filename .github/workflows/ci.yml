@@ -61,4 +61,4 @@ jobs:
         id: test-action
         uses: ./
         with:
-          base-branch: ${{ github.ref_name }}
+          base-branch: ${{ github.head_ref || github.ref_name }}
