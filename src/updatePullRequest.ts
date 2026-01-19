@@ -64,7 +64,7 @@ export class Action {
         )
         if (missingRequiredLabels.length !== 0) {
           core.info(
-            `Skipping PR #${pr.number} because it has not some required labels: ${missingRequiredLabels.join(
+            `Skipping PR #${pr.number} because it does not have some required labels: ${missingRequiredLabels.join(
               ', '
             )}`
           )
