@@ -1,17 +1,17 @@
 {
-  "name": "pr-updated",
-  "description": "GitHub Action to update pull request branches",
+  "name": "keep-pr-updated",
+  "description": "GitHub Action to keep pull request branches updated with the base branch",
   "version": "1.0.0",
-  "author": "",
+  "author": "alfred82santa <alfred82santa@gmail.com>",
   "type": "module",
   "private": true,
-  "homepage": "https://github.com/alfred82santa/pr-updated",
+  "homepage": "https://github.com/alfred82santa/keep-pr-updated",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alfred82santa/pr-updated.git"
+    "url": "git+https://github.com/alfred82santa/keep-pr-updated.git"
   },
   "bugs": {
-    "url": "https://github.com/alfred82santa/pr-updated/issues"
+    "url": "https://github.com/alfred82santa/keep-pr-updated/issues"
   },
   "keywords": [
     "actions"
