@@ -1,0 +1,14 @@
+name: Keep PRs Updated
+on:
+  push:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Keep PRs updated
+        uses: ./

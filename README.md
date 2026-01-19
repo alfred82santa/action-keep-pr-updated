@@ -8,7 +8,8 @@
 
 A GitHub Action that automatically keeps your pull requests up to date with the
 base branch. This action helps maintain clean and conflict-free pull requests by
-automatically updating them whenever this workflow runs (for example, after changes are pushed to the base branch).
+automatically updating them whenever this workflow runs (for example, after
+changes are pushed to the base branch).
 
 ## Features
 
@@ -30,6 +31,12 @@ on:
   push:
     branches:
       - main
+
+# Required if not custom token used
+#
+# permissions:
+#   contents: write
+#   pull-requests: write
 
 jobs:
   update-prs:
