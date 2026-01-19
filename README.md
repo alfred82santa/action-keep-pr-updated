@@ -60,7 +60,9 @@ jobs:
 > To use a PAT with this action:
 >
 > 1. [Create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
->    with appropriate permissions
+>    with appropriate permissions:
+>    - **contents:** write
+>    - **pull-requests:** write
 > 1. Add it as a repository secret
 > 1. Use it in the action:
 >
