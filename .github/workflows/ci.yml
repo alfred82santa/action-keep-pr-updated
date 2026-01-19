@@ -48,3 +48,19 @@ jobs:
       - name: Test
         id: npm-ci-test
         run: npm run ci-test
+
+  test-action:
+    name: GitHub Actions Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v5
+
+      - name: Test Local Action
+        id: test-action
+        uses: ./
+        with:
+          base-branch: ${{ github.head_ref || github.ref_name }}
+          required-labels: 'dry-run'

@@ -31337,13 +31337,9 @@ class Action {
         this.config = config;
         this.octokit = octokit;
     }
-    async *listAllPullRequests(filter = {}) {
+    async *listAllPullRequests(filterParams = {}) {
         let response;
         let page = 1;
-        let requiredLabels = [];
-        if (this.config.requiredLabels.length > 0) {
-            requiredLabels = this.config.requiredLabels;
-        }
         do {
             response = await this.octokit.rest.pulls.list({
                 per_page: this.PR_PER_PAGE,
@@ -31351,8 +31347,7 @@ class Action {
                 repo: this.config.repo,
                 base: this.config.baseBranch,
                 state: 'open',
-                labels: requiredLabels.join(','),
-                ...filter,
+                ...filterParams,
                 page: page++
             });
             for (const pr of response.data) {
@@ -31379,6 +31374,15 @@ class Action {
     async invokeUpdatePullRequests() {
         const prsResult = new PRResult();
         for await (const pr of this.listAllPullRequests()) {
+            if (this.config.requiredLabels.length > 0) {
+                const prLabelNames = pr.labels.map((l) => l.name);
+                const missingRequiredLabels = this.config.requiredLabels.filter((name) => !prLabelNames.includes(name));
+                if (missingRequiredLabels.length !== 0) {
+                    coreExports.info(`Skipping PR #${pr.number} because it has not some required labels: ${missingRequiredLabels.join(', ')}`);
+                    prsResult.skipped.push(pr);
+                    continue;
+                }
+            }
             if (this.config.avoidedLabels.length > 0) {
                 const hasAvoidedLabel = pr.labels
                     .map((l) => l.name)

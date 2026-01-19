@@ -30,6 +30,9 @@ jobs:
     name: Make release
     runs-on: ubuntu-latest
 
+    outputs:
+      minorVersion: ${{ steps.next-version.outputs.baseReleaseMinor }}
+
     steps:
       - name: Checkout
         id: checkout
@@ -86,3 +89,15 @@ jobs:
           tag: 'v${{ steps.next-version.outputs.major }}'
           force_push_tag: true
           message: 'Release ${{ steps.next-version.outputs.version }}'
+
+  bump-version:
+    name: Bump version
+    needs: make-release
+    if:
+      github.ref_name == format('release/%s',
+      needs.make-release.outputs.minorVersion) && inputs.preReleaseLevel ==
+      'none'
+    uses: ./.github/workflows/common-push-version.yml
+    with:
+      ref: ${{ github.ref_name }}
+      level: 'patch'
