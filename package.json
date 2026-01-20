@@ -37,12 +37,12 @@
   },
   "license": "AGPL-3.0-or-later",
   "dependencies": {
-    "@actions/core": "^1.11.1",
+    "@actions/core": "^2.0.2",
     "@octokit/types": "^15.0.0"
   },
   "devDependencies": {
     "@eslint/compat": "^1.4.0",
-    "@github/local-action": "^6.0.0",
+    "@github/local-action": "^7.0.0",
     "@jest/globals": "^30.2.0",
     "@rollup/plugin-commonjs": "^28.0.6",
     "@rollup/plugin-node-resolve": "^16.0.3",
