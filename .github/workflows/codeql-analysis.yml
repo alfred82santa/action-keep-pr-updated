@@ -4,9 +4,8 @@ on:
   pull_request:
     branches:
       - main
-  push:
-    branches:
-      - main
+      - release/*
+
   schedule:
     - cron: '31 7 * * 3'
 
@@ -15,6 +14,12 @@ permissions:
   checks: write
   contents: read
   security-events: write
+
+concurrency:
+  group:
+    ${{ github.workflow }}-${{ github.base_ref }}-${{ github.ref }}-${{
+    github.event_name}}
+  cancel-in-progress: true
 
 jobs:
   analyze:
@@ -34,7 +39,7 @@ jobs:
 
       - name: Initialize CodeQL
         id: initialize
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           config-file: .github/codeql/codeql-config.yml
           languages: ${{ matrix.language }}
@@ -42,8 +47,8 @@ jobs:
 
       - name: Autobuild
         id: autobuild
-        uses: github/codeql-action/autobuild@v3
+        uses: github/codeql-action/autobuild@v4
 
       - name: Perform CodeQL Analysis
         id: analyze
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
