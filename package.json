@@ -1,7 +1,7 @@
 {
   "name": "keep-pr-updated",
   "description": "GitHub Action to keep pull request branches updated with the base branch",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": "alfred82santa <alfred82santa@gmail.com>",
   "type": "module",
   "private": true,
