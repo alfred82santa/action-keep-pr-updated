@@ -1,0 +1,31 @@
+name: Stabilize Release (create release branch)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  create-release-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: main
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Get current version
+        id: current-version
+        run: |
+          echo "version=$(node -p "require('./package.json').version" | sed 's/^\([0-9]\+\.[0-9]\+\).*$/\1/')" >> "$GITHUB_OUTPUT"
+
+      - uses: peterjgrainger/action-create-branch@v2.2.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACTION_GITHUB_TOKEN }}
+        with:
+          branch: 'release/${{ steps.current-version.outputs.version }}'
