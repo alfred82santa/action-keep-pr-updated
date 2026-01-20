@@ -1,0 +1,25 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Publish prerelease version
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the main branch
+on:
+  push:
+    branches:
+      - main
+      - master
+      - release/*
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  make-release:
+    uses: ./.github/workflows/common-make-release.yml
+    secrets: inherit
+    with:
+      preReleaseLevel: |
+        ${{ contains(fromJson('["master", "main"]'), github.ref_name) && 'beta'
+        || (startsWith(github.ref_name, 'release/')) && 'rc' || 'alpha' }}

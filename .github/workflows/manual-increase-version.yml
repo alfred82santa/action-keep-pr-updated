@@ -1,0 +1,32 @@
+name: Increase version
+
+on:
+  workflow_dispatch:
+    inputs:
+      level:
+        description: 'Version level to increase (major, minor or patch)'
+        required: true
+        default: 'minor'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+      ref:
+        description: 'Base branch'
+        required: false
+        default: 'main'
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  increase_version:
+    uses: ./.github/workflows/common-push-version.yml
+    with:
+      level: ${{ inputs.level }}
+      ref: ${{ inputs.ref }}
+    secrets: inherit
