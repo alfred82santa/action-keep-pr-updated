@@ -23,6 +23,10 @@ jest.unstable_mockModule('@actions/github', () => github)
 
 // The module being tested should be imported dynamically. This ensures that the
 // mocks are used in place of any actual dependencies.
+/**
+ * @noformat
+ */
+// prettier-ignore
 const { updatePullRequest, Action } = await import(
   '../src/updatePullRequest.ts'
 )
