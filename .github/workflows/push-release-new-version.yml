@@ -20,7 +20,7 @@ jobs:
     outputs:
       minorVersion: ${{ steps.define_version.outputs.baseReleaseMinor }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           ref: main
 
